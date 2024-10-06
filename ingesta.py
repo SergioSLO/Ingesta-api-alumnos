@@ -1,20 +1,17 @@
 import boto3
-import psycopg2  # Usando psycopg2 para PostgreSQL
+import psycopg2 
 import csv
 
-# Configuración de la base de datos PostgreSQL
 db_host = "3.230.28.178"
 db_user = "postgres"
 db_password = "utec"
 db_name = "rockie"
-db_port = 8002
+db_port = 8001
 
-# Configuración de S3 y el archivo CSV
 ficheroUpload_activities = "activities.csv"
 ficheroUpload_student = "student.csv"
 nombreBucket = "bucket-ingesta-parcial"
 
-# Conexión a la base de datos PostgreSQL
 conn = psycopg2.connect(
     host=db_host,
     port=db_port,
@@ -24,7 +21,6 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-# Función para exportar una tabla a un archivo CSV
 def export_table_to_csv(table_name, file_name):
     query = f"SELECT * FROM {table_name}"
     cursor.execute(query)
@@ -37,15 +33,12 @@ def export_table_to_csv(table_name, file_name):
         writer.writerow(column_names)
         writer.writerows(rows)
 
-# Exportar las tablas 'activities' y 'student'
 export_table_to_csv('activities', ficheroUpload_activities)
-export_table_to_csv('student', ficheroUpload_student)
+export_table_to_csv('students', ficheroUpload_student)
 
-# Cerrar la conexión a la base de datos
 cursor.close()
 conn.close()
 
-# Subir los archivos CSV a S3
 s3 = boto3.client('s3')
 s3.upload_file(ficheroUpload_activities, nombreBucket, ficheroUpload_activities)
 s3.upload_file(ficheroUpload_student, nombreBucket, ficheroUpload_student)
